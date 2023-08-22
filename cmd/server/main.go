@@ -1,40 +1,12 @@
 package main
 
 import (
-	"database/sql"
 	"fmt"
 	"html/template"
 	"log"
 	"net/http"
-	"os"
-
-	_ "modernc.org/sqlite"
+	"server/internal/db"
 )
-
-func fileExists(filename string) bool {
-	info, err := os.Stat(filename)
-	if os.IsNotExist(err) {
-		 return false
-	}
-	return !info.IsDir()
-}
-
-func createDb(dirname string, filename string) {
-	os.MkdirAll(dirname, 0755)
-	os.Create(dirname + "/" + filename)
-}
-
-func initDb(db *sql.DB) {
-	_, err := db.Exec(`CREATE TABLE IF NOT EXISTS users (
-		id INTEGER PRIMARY KEY,
-		name TEXT NOT NULL,
-		wins INTEGER DEFAULT 0
-	)`)
-
-	if err != nil {
-		log.Fatal("error creating table")
-	}
-}
 
 func main() {
 	log.SetFlags(log.Lshortfile)
@@ -44,29 +16,21 @@ func main() {
 		tmpl.Execute(w, nil)
 	}
 
-	if (!fileExists("./data/sqlite/data.db")) {
-		createDb("./data/sqlite", "data.db")
-	}
+	database, err := db.CreateDbIfNotExists()
 
-	db, _ := sql.Open("sqlite", "./data/sqlite/data.db")
-	defer db.Close()
-
-	err := db.Ping()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	initDb(db)
-
 	http.HandleFunc("/", returnTemplate)
 
 	http.HandleFunc("/set", func(w http.ResponseWriter, r *http.Request) {
-		db.Exec(`INSERT INTO users (name) VALUES ('TIMMY')`)
+		database.Exec(`INSERT INTO users (name) VALUES ('TIMMY')`)
 		fmt.Fprintf(w, "<div><p>Successfully inserted</p></div>")
 	})
 	
 	http.HandleFunc("/get", func(w http.ResponseWriter, r *http.Request) {
-		rows, err := db.Query(`SELECT * FROM users`)
+		rows, err := database.Query(`SELECT * FROM users`)
 		if err != nil {
 			log.Fatal("error getting from database")
 		}

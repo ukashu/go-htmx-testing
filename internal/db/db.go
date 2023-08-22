@@ -2,7 +2,6 @@ package db
 
 import (
 	"database/sql"
-	"log"
 	"os"
 
 	_ "modernc.org/sqlite"
@@ -21,7 +20,7 @@ func createDb(dirname string, filename string) {
 	os.Create(dirname + "/" + filename)
 }
 
-func initDb(db *sql.DB) {
+func initDb(db *sql.DB) error {
 	_, err := db.Exec(`CREATE TABLE IF NOT EXISTS users (
 		id INTEGER PRIMARY KEY,
 		name TEXT NOT NULL,
@@ -29,8 +28,9 @@ func initDb(db *sql.DB) {
 	)`)
 
 	if err != nil {
-		log.Fatal("error creating table")
+		return err
 	}
+	return nil
 }
 
 func CreateDbIfNotExists() (*sql.DB, error) {
@@ -44,7 +44,10 @@ func CreateDbIfNotExists() (*sql.DB, error) {
 			return nil, err
 		}
 
-		initDb(db)
+		err = initDb(db)
+		if err != nil {
+			return nil, err
+		}
 
 		return db, nil
 	} else {
