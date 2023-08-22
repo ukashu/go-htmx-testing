@@ -8,6 +8,10 @@ import (
 	"server/internal/db"
 )
 
+func SendHtmxJs(w http.ResponseWriter, r *http.Request) {
+	http.ServeFile(w, r, "./cmd/pkg/htmx.min.js")
+}
+
 func main() {
 	log.SetFlags(log.Lshortfile)
 
@@ -31,6 +35,8 @@ func main() {
 		Job_listing_url string
 		Status string
 	}
+
+	http.HandleFunc("/htmx.min.js", SendHtmxJs)
 
 	http.HandleFunc("/set", func(w http.ResponseWriter, r *http.Request) {
 		database.Exec(`INSERT INTO jobs (company) VALUES ('XKOM')`)
