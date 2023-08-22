@@ -9,10 +9,18 @@
   </head>
   <body>
     <div>
-      <h1>HELLOOOO WORDDDLLDDDOEOEOE</h1>
-      <button hx-get="/clicked" hx-swap="outerHTML">
-        Click Me
-      </button>
+      <h1>HELLO WORLD</h1>
+    </div>
+    <div>
+      <form hx-post="/jobs" hx-swap="#my-jobs">
+        <input id="company" name="company" type="text" placeholder="company">
+        <input id="job_title" name="job_title" type="text" placeholder="job_title">
+        <input id="job_listing_url" name="job_listing_url" type="text" placeholder="job_listing_url">
+        <button type="submit">Submit</button>
+      </form>
+    </div>
+    <div id="my-jobs">
+      <p>No jobs, you have to submit</p>
     </div>
   </body>
 </html>

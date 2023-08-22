@@ -21,10 +21,12 @@ func createDb(dirname string, filename string) {
 }
 
 func initDb(db *sql.DB) error {
-	_, err := db.Exec(`CREATE TABLE IF NOT EXISTS users (
+	_, err := db.Exec(`CREATE TABLE IF NOT EXISTS jobs (
 		id INTEGER PRIMARY KEY,
-		name TEXT NOT NULL,
-		wins INTEGER DEFAULT 0
+		company TEXT NOT NULL DEFAULT 'undefined',
+		job_title TEXT NOT NULL DEFAULT 'undefined',
+		job_listing_url TEXT NOT NULL DEFAULT 'undefined',
+		status TEXT CHECK( status IN ('default', 'sent', 'rejected') ) NOT NULL DEFAULT 'default'
 	)`)
 
 	if err != nil {
@@ -33,7 +35,7 @@ func initDb(db *sql.DB) error {
 	return nil
 }
 
-func CreateDbIfNotExists() (*sql.DB, error) {
+func ConnectToDb() (*sql.DB, error) {
 	if (!fileExists("./data/sqlite/data.db")) {
 		createDb("./data/sqlite", "data.db")
 
