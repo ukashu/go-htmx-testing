@@ -1,0 +1,11 @@
+.default {
+  background-color: aliceblue;
+}
+
+.sent {
+  background-color: rgb(78, 141, 78);
+}
+
+.rejected {
+  background-color: rgb(148, 64, 58);
+}

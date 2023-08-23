@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"server/internal/db"
+	"strings"
 )
 
 type Job struct {
@@ -20,7 +21,8 @@ func NewRouter() http.Handler {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/", returnTemplate)
-	mux.HandleFunc("/htmx.min.js", SendHtmxJs)
+	mux.HandleFunc("/htmx.min.js", sendHtmxJs)
+	mux.HandleFunc("/css", sendCss)
 	mux.HandleFunc("/jobs", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "GET" {
 			getJobs(w, r)
@@ -28,11 +30,22 @@ func NewRouter() http.Handler {
 			addJob(w, r)
 		}
 	})
+	mux.HandleFunc("/jobs/", func(w http.ResponseWriter, r *http.Request) {
+		id := r.URL.Path[6:]
+		id = strings.Split(id, "/")[0]
+		if r.Method == "PUT" {
+			changeJobStatus(w, r, id)
+		}
+	})
 
 	return mux
 }
 
-func SendHtmxJs(w http.ResponseWriter, r *http.Request) {
+func sendCss(w http.ResponseWriter, r *http.Request) {
+	http.ServeFile(w, r, "./cmd/templates/styles.css")
+}
+
+func sendHtmxJs(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, "./pkg/htmx.min.js")
 }
 
@@ -73,5 +86,20 @@ func addJob(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 
-	fmt.Fprintf(w, "<div hx-get=\"/jobs\" hx-trigger=\"load delay:2s\" hx-swap=\"#my-jobs\"><p>Successfully inserted</p></div>")
+	fmt.Fprintf(w, "<div hx-get=\"/jobs\" hx-trigger=\"load\" hx-target=\"#my-jobs\"><p>Successfully inserted</p></div>")
+}
+
+func changeJobStatus(w http.ResponseWriter, r *http.Request, id string) {
+	r.ParseForm()
+
+	status := r.FormValue("status")
+
+	fmt.Printf("status: %v, id: %v\n", status, id)
+
+	_, err := db.Db.Exec(`UPDATE jobs SET status=? WHERE id=?`, status, id)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Fprintf(w, "<div hx-get=\"/jobs\" hx-trigger=\"load\" hx-target=\"#my-jobs\"><p>Successfully inserted</p></div>")
 }

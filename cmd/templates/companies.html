@@ -1,7 +1,20 @@
 <div>
-  <ul>
     {{ range . }}
-      <li><p>ID: {{ .Id }} COMPANY: {{ .Company }} STATUS: {{ .Status }}</p></li>
+      {{if eq .Status "sent"}}
+      <p class="sent">
+        ID: {{ .Id }} COMPANY: {{ .Company }} STATUS: 
+        <button hx-put="/jobs/{{ .Id }}" hx-vals='{"status":"rejected"}'>{{ .Status }}</button>
+      </p>
+      {{else if eq .Status "rejected"}}
+      <p class="rejected">
+        ID: {{ .Id }} COMPANY: {{ .Company }} STATUS: 
+        <button hx-put="/jobs/{{ .Id }}" hx-vals='{"status":"default"}'>{{ .Status }}</button>
+      </p>
+      {{else}}
+      <p class="default">
+        ID: {{ .Id }} COMPANY: {{ .Company }} STATUS: 
+        <button hx-put="/jobs/{{ .Id }}" hx-vals='{"status":"sent"}'>{{ .Status }}</button>
+      </p>
+      {{end}}
     {{end}}
-  </ul>
 </div>
