@@ -94,8 +94,6 @@ func changeJobStatus(w http.ResponseWriter, r *http.Request, id string) {
 
 	status := r.FormValue("status")
 
-	fmt.Printf("status: %v, id: %v\n", status, id)
-
 	_, err := db.Db.Exec(`UPDATE jobs SET status=? WHERE id=?`, status, id)
 	if err != nil {
 		log.Fatal(err)
