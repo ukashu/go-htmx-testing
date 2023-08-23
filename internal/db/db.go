@@ -7,6 +7,8 @@ import (
 	_ "modernc.org/sqlite"
 )
 
+var Db *sql.DB
+
 func fileExists(filename string) bool {
 	info, err := os.Stat(filename)
 	if os.IsNotExist(err) {
@@ -35,30 +37,35 @@ func initDb(db *sql.DB) error {
 	return nil
 }
 
-func ConnectToDb() (*sql.DB, error) {
-	if (!fileExists("./data/sqlite/data.db")) {
-		createDb("./data/sqlite", "data.db")
+func ConnectToDb(dirname string, filename string) error {
+	dbRoute := dirname + "/" + filename
 
-		db, _ := sql.Open("sqlite", "./data/sqlite/data.db")
+	if (!fileExists(dbRoute)) {
+		createDb(dirname, filename)
+
+		db, _ := sql.Open("sqlite", dbRoute)
 
 		err := db.Ping()
 		if err != nil {
-			return nil, err
+			return err
 		}
 
 		err = initDb(db)
 		if err != nil {
-			return nil, err
+			return err
 		}
 
-		return db, nil
+		Db = db
+
+		return nil
 	} else {
-		db, err := sql.Open("sqlite", "./data/sqlite/data.db")
+		db, err := sql.Open("sqlite", dbRoute)
 
 		if err != nil {
-			return nil, err
+			return err
 		}
 
-		return db, nil
+		Db = db
+		return nil
 	}
 }
